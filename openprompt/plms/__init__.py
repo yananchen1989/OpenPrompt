@@ -50,7 +50,7 @@ _MODEL_CLASSES = {
         'model': GPT2LMHeadModel,
         'wrapper': LMTokenizerWrapper
     }),
-    't5':ModelClass(**{
+    't5-base':ModelClass(**{
         'config': T5Config,
         'tokenizer': T5Tokenizer,
         'model': T5ForConditionalGeneration,
@@ -69,7 +69,7 @@ def get_model_class(plm_type: str):
     return _MODEL_CLASSES[plm_type]
 
 
-def load_plm(model_name, model_path, specials_to_add = None):
+def load_plm(model_name, model_path, cache_dir, specials_to_add = None):
     r"""A plm loader using a global config.
     It will load the model, tokenizer, and config simulatenously.
     
@@ -83,7 +83,8 @@ def load_plm(model_name, model_path, specials_to_add = None):
         :obj:`wrapper`: The wrapper class of this plm.
     """
     model_class = get_model_class(plm_type = model_name)
-    model_config = model_class.config.from_pretrained(model_path)
+    model_config = model_class.config.from_pretrained(model_path, \
+        cache_dir=cache_dir,local_files_only=True)
     # you can change huggingface model_config here
     # if 't5'  in model_name: # remove dropout according to PPT~\ref{}
     #     model_config.dropout_rate = 0.0
@@ -92,8 +93,10 @@ def load_plm(model_name, model_path, specials_to_add = None):
         # model_config.attn_pdrop = 0.0
         # model_config.resid_pdrop = 0.0
         # model_config.embd_pdrop = 0.0
-    model = model_class.model.from_pretrained(model_path, config=model_config)
-    tokenizer = model_class.tokenizer.from_pretrained(model_path)
+    model = model_class.model.from_pretrained(model_path, config=model_config, \
+        cache_dir=cache_dir,local_files_only=True)
+    tokenizer = model_class.tokenizer.from_pretrained(model_path, \
+        cache_dir=cache_dir,local_files_only=True)
     wrapper = model_class.wrapper
 
 
